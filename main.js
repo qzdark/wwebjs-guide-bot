@@ -4,11 +4,12 @@ const fs = require('fs');
 const config = require('./config');
 
 const client = new Client({
-	puppeteer: { 
-		headless: true,
+	puppeteer: {
+		headless: false,
 		executablePath: 'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe', 
 	},
-	authStrategy: new LocalAuth()
+	authStrategy: new LocalAuth(),
+	qrMaxRetries: 1
 });
 
 client.prefix = config.prefix;
@@ -38,16 +39,13 @@ for (const file of eventFiles) {
 		client.on(event.name, event.execute.bind(null, client));
 	}
 }
-
+client.on('authenticated', async () => {
+	console.log(client.info);
+});
 client.on('message_create', async message => {
     if(message.hasMedia) {
         const media = await message.downloadMedia();
-        console.log(
-			'Information about media:' +
-			`\nType: ${media.mimetype}` +
-			`\nFilesize: ${media.filesize}B` +
-			`\nFilename: ${media.filename}`
-        );
+		console.log(message, media)
     }
 });
 
